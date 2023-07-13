@@ -1014,11 +1014,11 @@ and transl_guard ~scopes guard rhs_sort rhs =
   let expr = event_before ~scopes rhs (transl_exp ~scopes rhs_sort rhs) in
   match guard with
   | None -> expr
-  | Some (Predicate cond) ->
+  | Some (Guard_predicate cond) ->
       event_before ~scopes cond
         (Lifthenelse(transl_exp ~scopes Sort.for_predef_value cond,
                      expr, staticfail, layout))
-  | Some (Pattern _) -> failwith "guard pattern translation unimplemented"
+  | Some (Guard_pattern _) -> failwith "guard pattern translation unimplemented"
 
 and transl_case ~scopes rhs_sort {c_lhs; c_guard; c_rhs} =
   c_lhs, transl_guard ~scopes c_guard rhs_sort c_rhs

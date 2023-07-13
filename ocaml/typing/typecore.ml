@@ -3363,25 +3363,13 @@ let rec is_nonexpansive exp =
           | Tpat_exception _ -> true
           | _ -> false } pat
       in
-<<<<<<< HEAD
-||||||| parent of 3c50418a (fixed exception pattern check)
-      let guard_contains_exception_pat = function
-        | Some (Guard_pattern (_, _, pat)) -> contains_exception_pat pat
-        | None | Guard_predicate _ -> false
-      in
-=======
-      let guard_contains_exception_pat = function
-        | Some (Typedtree.Pattern (_, _, pat)) -> contains_exception_pat pat
-        | None | Some (Typedtree.Predicate _) -> false
-      in
->>>>>>> 3c50418a (fixed exception pattern check)
       is_nonexpansive e &&
       List.for_all
         (fun {c_lhs; c_guard; c_rhs} ->
            let is_guard_nonexpansive = match c_guard with
              | None -> true
-             | Some (Typedtree.Predicate p) -> is_nonexpansive p
-             | Some (Typedtree.Pattern (e, _, pat)) ->
+             | Some (Guard_predicate p) -> is_nonexpansive p
+             | Some (Guard_pattern (e, _, pat)) ->
                  is_nonexpansive e && not (contains_exception_pat pat)
            in
            is_guard_nonexpansive && is_nonexpansive c_rhs
@@ -6978,7 +6966,7 @@ and type_cases
                         mk_expected ~explanation:When_guard Predef.type_bool
                       in
                       Some
-                        (Predicate
+                        (Guard_predicate
                           (type_expect ext_env mode_local pred expected_bool))
                 in
                 let exp =
@@ -7000,7 +6988,7 @@ and type_cases
                 in
                 (match cases with
                   | [ { c_lhs = pat; c_guard = None; c_rhs = exp } ] ->
-                    Some (Typedtree.Pattern (arg, sort, pat)), exp
+                    Some (Guard_pattern (arg, sort, pat)), exp
                   | _ ->
                       Misc.fatal_error "type_cases invariant violated")
         in

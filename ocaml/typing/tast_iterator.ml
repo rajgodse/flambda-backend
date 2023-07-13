@@ -508,8 +508,8 @@ let case sub {c_lhs; c_guard; c_rhs} =
   sub.expr sub c_rhs
 
 let guard sub = function
-  | Predicate p -> sub.expr sub p
-  | Pattern (e, _, pat) -> sub.expr sub e; sub.pat sub pat
+  | Guard_predicate p -> sub.expr sub p
+  | Guard_pattern (e, _, pat) -> sub.expr sub e; sub.pat sub pat
 
 let value_binding sub {vb_pat; vb_expr; _} =
   sub.pat sub vb_pat;

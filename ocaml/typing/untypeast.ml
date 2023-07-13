@@ -412,8 +412,8 @@ let exp_extra sub (extra, loc, attrs) sexp =
   Exp.mk ~loc ~attrs desc
 
 let guard sub = function 
-  | Predicate p -> Pguard_predicate (sub.expr sub p)
-  | Pattern (e, _, pat) ->
+  | Guard_predicate p -> Pguard_predicate (sub.expr sub p)
+  | Guard_pattern (e, _, pat) ->
       Pguard_pattern {
         pgp_scrutinee = sub.expr sub e;
         pgp_pattern = sub.pat sub pat;

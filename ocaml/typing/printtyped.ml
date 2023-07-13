@@ -1042,8 +1042,8 @@ and case
   expression (i+1) ppf c_rhs;
 
 and guard i ppf = function
-  | Predicate p -> expression i ppf p
-  | Pattern (e, s, pat) ->
+  | Guard_predicate p -> expression i ppf p
+  | Guard_pattern (e, s, pat) ->
       expression i ppf e;
       line i ppf "%a " Layouts.Sort.format s;
       pattern i ppf pat

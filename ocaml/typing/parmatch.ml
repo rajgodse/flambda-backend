@@ -2445,8 +2445,8 @@ let pattern_stable_vars ns p =
 
 let all_rhs_idents guard =
   let exp = match guard with
-    | Predicate p -> p
-    | Pattern (e, _, _) -> e
+    | Guard_predicate p -> p
+    | Guard_pattern (e, _, _) -> e
   in
   let ids = ref Ident.Set.empty in
   let open Tast_iterator in

@@ -1203,7 +1203,7 @@ and case
            ---------------------------------------
            G - p; m[mp] |- (p when g -> e) : m
         *)
-        | Some (Predicate p) ->
+        | Some (Guard_predicate p) ->
             join [ expression p << Dereference; expression c_rhs ]
         (*
            G |- (match e1 with p2 -> e2) : m
@@ -1214,7 +1214,7 @@ and case
            This judgement uses uses the one in [match_expression] as a
            "subroutine."
         *)
-        | Some (Pattern (e, _, pat)) ->
+        | Some (Guard_pattern (e, _, pat)) ->
           let cases = [ { c_lhs = pat; c_guard = None; c_rhs } ] in
           match_expression e cases
       in
