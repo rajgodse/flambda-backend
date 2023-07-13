@@ -6965,15 +6965,15 @@ and type_cases
           else ty_res in
         let guard, exp =
           match pc_guard with
-            | None | Some (Guard_predicate _) ->
+            | None | Some (Pguard_predicate _) ->
                 let guard =
                   match pc_guard with
                   (* This case is unreachable, as [pc_guard] cannot match the
                      outer pattern while also matching [Some (Guard_pattern _)]
                    *)
-                  | Some (Guard_pattern _) -> assert false
+                  | Some (Pguard_pattern _) -> assert false
                   | None -> None
-                  | Some (Guard_predicate pred) ->
+                  | Some (Pguard_predicate pred) ->
                       let expected_bool =
                         mk_expected ~explanation:When_guard Predef.type_bool
                       in
@@ -6988,7 +6988,7 @@ and type_cases
                 in
                 guard, exp
             | Some
-                (Guard_pattern 
+                (Pguard_pattern 
                   { pgp_scrutinee = e; pgp_pattern = pat; pgp_loc = loc }) ->
                 (* CR-soon rgodse: This `partial` is needed by the pattern
                    match compiler, thread it through into typedtree. *)

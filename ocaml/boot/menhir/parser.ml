@@ -21632,7 +21632,7 @@ module Tables = struct
         let _endpos = _endpos__5_ in
         let _v : (Parsetree.case) = 
 # 3032 "parsing/parser.mly"
-      ( Exp.case _1 ~guard:(Guard_predicate _3) _5 )
+      ( Exp.case _1 ~guard:(Pguard_predicate _3) _5 )
 # 21637 "parsing/parser.ml"
          in
         {
@@ -21702,7 +21702,7 @@ module Tables = struct
       ( let guard_pattern =
           Guard_pattern.mk ~loc:(make_loc (_startpos__2_, _endpos__5_)) _3 _5
         in
-        Exp.case _1 ~guard:(Guard_pattern guard_pattern) _7 )
+        Exp.case _1 ~guard:(Pguard_pattern guard_pattern) _7 )
 # 21707 "parsing/parser.ml"
          in
         {

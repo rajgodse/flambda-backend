@@ -804,8 +804,8 @@ let default_iterator =
       );
 
     guard = (fun this -> function
-      | Guard_predicate e -> this.expr this e
-      | Guard_pattern gp -> GP.iter this gp);
+      | Pguard_predicate e -> this.expr this e
+      | Pguard_pattern gp -> GP.iter this gp);
 
     location = (fun _this _l -> ());
 

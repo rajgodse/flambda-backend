@@ -918,8 +918,8 @@ let default_mapper =
       );
 
     guard = (fun this -> function
-      | Guard_predicate e -> Guard_predicate (this.expr this e)
-      | Guard_pattern gp -> Guard_pattern (GP.map this gp));
+      | Pguard_predicate e -> Pguard_predicate (this.expr this e)
+      | Pguard_pattern gp -> Pguard_pattern (GP.map this gp));
 
     location = (fun _this l -> l);
 

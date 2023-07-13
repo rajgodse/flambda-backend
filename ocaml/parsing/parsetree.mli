@@ -440,8 +440,8 @@ and case =
 (** Values of type {!case} represents [(P -> E)] or [(P when E0 -> E)] *)
 
 and guard =
-  | Guard_predicate of expression
-  | Guard_pattern of guard_pattern
+  | Pguard_predicate of expression
+  | Pguard_pattern of guard_pattern
 
 and guard_pattern =
   {

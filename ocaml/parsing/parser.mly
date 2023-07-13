@@ -3029,7 +3029,7 @@ match_case:
     pattern MINUSGREATER seq_expr
       { Exp.case $1 $3 }
   | pattern WHEN seq_expr MINUSGREATER seq_expr
-      { Exp.case $1 ~guard:(Guard_predicate $3) $5 }
+      { Exp.case $1 ~guard:(Pguard_predicate $3) $5 }
   /* CR-soon rgodse: We should consider whether to also allow seq_expr, as this
      also parses without conflict.
 
@@ -3040,7 +3040,7 @@ match_case:
       { let guard_pattern =
           Guard_pattern.mk ~loc:(make_loc ($startpos($2), $endpos($5))) $3 $5
         in
-        Exp.case $1 ~guard:(Guard_pattern guard_pattern) $7 }
+        Exp.case $1 ~guard:(Pguard_pattern guard_pattern) $7 }
   | pattern MINUSGREATER DOT
       { Exp.case $1 (Exp.unreachable ~loc:(make_loc $loc($3)) ()) }
 ;

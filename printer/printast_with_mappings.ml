@@ -958,8 +958,8 @@ and case i ppf {pc_lhs; pc_guard; pc_rhs} =
   expression (i+1) ppf pc_rhs;
 
 and guard i ppf = function
-  | Guard_predicate e -> expression i ppf e
-  | Guard_pattern { pgp_scrutinee = e; pgp_pattern = pat; _ } ->
+  | Pguard_predicate e -> expression i ppf e
+  | Pguard_pattern { pgp_scrutinee = e; pgp_pattern = pat; _ } ->
       expression i ppf e;
       line i ppf "<match>\n";
       pattern (i + 1) ppf pat
