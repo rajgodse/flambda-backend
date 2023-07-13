@@ -3363,6 +3363,18 @@ let rec is_nonexpansive exp =
           | Tpat_exception _ -> true
           | _ -> false } pat
       in
+<<<<<<< HEAD
+||||||| parent of 3c50418a (fixed exception pattern check)
+      let guard_contains_exception_pat = function
+        | Some (Guard_pattern (_, _, pat)) -> contains_exception_pat pat
+        | None | Guard_predicate _ -> false
+      in
+=======
+      let guard_contains_exception_pat = function
+        | Some (Typedtree.Pattern (_, _, pat)) -> contains_exception_pat pat
+        | None | Some (Typedtree.Predicate _) -> false
+      in
+>>>>>>> 3c50418a (fixed exception pattern check)
       is_nonexpansive e &&
       List.for_all
         (fun {c_lhs; c_guard; c_rhs} ->
