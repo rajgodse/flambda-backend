@@ -37,6 +37,7 @@ type mapper =
     expr: mapper -> expression -> expression;
     extension_constructor: mapper -> extension_constructor ->
       extension_constructor;
+    guard: mapper -> guard -> guard;
     layout_annotation: mapper -> const_layout -> const_layout;
     module_binding: mapper -> module_binding -> module_binding;
     module_coercion: mapper -> module_coercion -> module_coercion;
@@ -774,9 +775,13 @@ let case
   = fun sub {c_lhs; c_guard; c_rhs} ->
   {
     c_lhs = sub.pat sub c_lhs;
-    c_guard = Option.map (sub.expr sub) c_guard;
+    c_guard = Option.map (sub.guard sub) c_guard;
     c_rhs = sub.expr sub c_rhs;
   }
+
+let guard sub = function
+  | Predicate p -> Predicate (sub.expr sub p)
+  | Pattern (e, s, pat) -> Pattern (sub.expr sub e, s, sub.pat sub pat)
 
 let value_binding sub x =
   let vb_pat = sub.pat sub x.vb_pat in
@@ -802,6 +807,7 @@ let default =
     class_type_field;
     env;
     expr;
+    guard;
     extension_constructor;
     layout_annotation;
     module_binding;
