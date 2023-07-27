@@ -1044,11 +1044,10 @@ and case_rhs i ppf = function
       expression (i + 1) ppf bg_guard;
       expression i ppf bg_rhs
   | Pattern_guarded_rhs { pg_scrutinee; pg_scrutinee_sort; pg_cases } ->
-      line i ppf "<when>\n";
+      line i ppf "<when-pattern>\n";
       expression (i + 1) ppf pg_scrutinee;
       line (i + 1) ppf "%a\n" Layouts.Sort.format pg_scrutinee_sort;
-      line i ppf "<match>\n";
-      list i case ppf pg_cases
+      list (i + 1) case ppf pg_cases
 
 and value_binding i ppf x =
   line i ppf "<def>\n";
