@@ -1000,5 +1000,3 @@ val pat_bound_idents_full:
 (** Splits an or pattern into its value (left) and exception (right) parts. *)
 val split_pattern:
   computation general_pattern -> pattern option * pattern option
-
-val loc_of_rhs: case_rhs -> Location.t

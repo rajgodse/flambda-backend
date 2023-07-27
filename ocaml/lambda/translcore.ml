@@ -1797,7 +1797,11 @@ and transl_letop ~scopes loc env let_ ands param param_sort case case_sort
     in
     let return_layout = layout_rhs case_sort case.c_rhs in
     let curry = More_args { partial_mode = Alloc_mode.global } in
-    let rhs_loc = loc_of_rhs case.c_rhs in
+    let rhs_loc =
+      match case.c_rhs with
+      | Simple_rhs e | Boolean_guarded_rhs { bg_rhs = e; _ } -> e.exp_loc
+      | Pattern_guarded_rhs { pg_loc; _ } -> pg_loc
+    in
     let (kind, params, return, _region), body =
       event_function_rhs ~scopes case.c_rhs
         (function repr ->

@@ -1020,20 +1020,3 @@ let split_pattern pat =
         combine_opts (into cpat) exns1 exns2
   in
   split_pattern pat
-
-let exp_of_rhs = function
-  | Simple_rhs e | Boolean_guarded_rhs { bg_rhs = e; _ } -> e
-  | Pattern_guarded_rhs { pg_scrutinee; pg_scrutinee_sort; pg_cases; pg_partial;
-                          pg_env; pg_loc; pg_type } ->
-     { exp_attributes = []
-     ; exp_desc =
-         Texp_match (pg_scrutinee, pg_scrutinee_sort, pg_cases, pg_partial)
-     ; exp_env = pg_env
-     ; exp_extra = []
-     ; exp_loc = pg_loc
-     ; exp_type = pg_type
-     }
-
-let loc_of_rhs = function
-  | Simple_rhs e | Boolean_guarded_rhs { bg_rhs = e; _ } -> e.exp_loc
-  | Pattern_guarded_rhs { pg_loc; _ } -> pg_loc
