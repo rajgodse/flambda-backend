@@ -1001,5 +1001,4 @@ val pat_bound_idents_full:
 val split_pattern:
   computation general_pattern -> pattern option * pattern option
 
-val exp_of_rhs: case_rhs -> expression
 val loc_of_rhs: case_rhs -> Location.t

@@ -225,20 +225,21 @@ let rec push_defaults loc bindings use_lhs arg_mode arg_sort cases
     [{c_lhs=pat;
       c_rhs=
         Simple_rhs
-          ( { exp_desc = Texp_function { arg_label; param; cases; partial;
-                                       region; curry; warnings; arg_mode;
-                                       arg_sort; ret_sort; alloc_mode } } as exp
-          )}]
+          ({ exp_desc = Texp_function { arg_label; param; cases; partial;
+                                        region; curry; warnings; arg_mode;
+                                        arg_sort; ret_sort; alloc_mode } }
+           as exp)}]
     when bindings = [] || trivial_pat pat ->
       let cases =
         push_defaults exp.exp_loc bindings false arg_mode arg_sort cases partial
           warnings
       in
-      [{c_lhs=pat;
-        c_rhs=Simple_rhs {exp with exp_desc =
-                            Texp_function { arg_label; param; cases; partial;
-                                            region; curry; warnings; arg_mode;
-                                            arg_sort; ret_sort; alloc_mode }}}]
+      let exp_desc =
+        Texp_function
+          { arg_label; param; cases; partial; region; curry; warnings; arg_mode;
+            arg_sort; ret_sort; alloc_mode }
+      in
+      [ { c_lhs = pat; c_rhs = Simple_rhs { exp with exp_desc } } ]
   | [{c_lhs=pat;
       c_rhs=
         Simple_rhs
@@ -255,7 +256,13 @@ let rec push_defaults loc bindings use_lhs arg_mode arg_sort cases
       [{case with c_rhs = Simple_rhs (wrap_bindings bindings exp)}]
   | {c_lhs=pat; c_rhs=rhs } :: _
     when bindings <> [] ->
-      let exp = exp_of_rhs rhs in
+      let exp_loc, exp_extra, exp_type, exp_env, exp_attributes =
+        match rhs with
+        | Simple_rhs e | Boolean_guarded_rhs { bg_rhs = e; _ } ->
+            e.exp_loc, e.exp_extra, e.exp_type, e.exp_env, e.exp_attributes
+        | Pattern_guarded_rhs { pg_loc; pg_env; pg_type; _ } ->
+            pg_loc, [], pg_type, pg_env, []
+      in
       let mode = Value_mode.of_alloc arg_mode in
       let param = Typecore.name_cases "param" cases in
       let desc =
@@ -263,17 +270,17 @@ let rec push_defaults loc bindings use_lhs arg_mode arg_sort cases
          val_attributes = []; Types.val_loc = Location.none;
          val_uid = Types.Uid.internal_not_actually_unique; }
       in
-      let env = Env.add_value ~mode param desc exp.exp_env in
+      let env = Env.add_value ~mode param desc exp_env in
       let name = Ident.name param in
       let exp =
         let cases =
           let pure_case ({c_lhs; _} as case) =
             {case with c_lhs = as_computation_pattern c_lhs} in
           List.map pure_case cases in
-        { exp with exp_loc = loc; exp_env = env; exp_desc =
-          Texp_match
-            ({exp with exp_type = pat.pat_type; exp_env = env; exp_desc =
-              Texp_ident
+        { exp_loc = loc; exp_env = env; exp_extra; exp_type; exp_attributes;
+          exp_desc = Texp_match
+            ({ exp_type = pat.pat_type; exp_env = env; exp_loc; exp_extra;
+               exp_attributes; exp_desc = Texp_ident
                 (Path.Pident param, mknoloc (Longident.Lident name),
                  desc, Id_value)},
              arg_sort,
@@ -1039,16 +1046,16 @@ and transl_list_with_shape ~scopes expr_list =
 
 and transl_rhs ~scopes rhs_sort rhs =
   let layout = layout_rhs rhs_sort rhs in
-  let transl_unguarded rhs =
-    event_before ~scopes rhs (transl_exp ~scopes rhs_sort rhs)
+  let transl_body body =
+    event_before ~scopes body (transl_exp ~scopes rhs_sort body)
   in
   match rhs with
-  | Simple_rhs rhs -> Matching.mk_unguarded_rhs (transl_unguarded rhs)
+  | Simple_rhs rhs -> Matching.mk_unguarded_rhs (transl_body rhs)
   | Boolean_guarded_rhs { bg_guard; bg_rhs } ->
       let guard = transl_exp ~scopes Sort.for_predef_value bg_guard in
-      let rhs = event_before ~scopes bg_rhs (transl_unguarded bg_rhs) in
+      let rhs = event_before ~scopes bg_rhs (transl_body bg_rhs) in
       let patch_guarded ~patch =
-        event_before ~scopes bg_guard (Lifthenelse (guard, rhs, patch, layout))
+        event_before ~scopes bg_guard (Lifthenelse (guard, body, patch, layout))
       in
       let free_variables =
         Ident.Set.union (free_variables guard) (free_variables rhs)
