@@ -2168,9 +2168,10 @@ let check_unused pred casel =
             with Empty | Not_found -> assert false
             end ;
 
-          match c_rhs with
-          | Boolean_guarded_rhs _ | Pattern_guarded_rhs _ -> do_rec pref rem
-          | Simple_rhs _ -> do_rec ([q]::pref) rem
+          if is_guarded_rhs c_rhs then
+            do_rec pref rem
+          else
+            do_rec ([q]::pref) rem
     in
     do_rec [] casel
 

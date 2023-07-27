@@ -1442,11 +1442,11 @@ let split_cases env cases =
     | Some c_lhs -> { case with c_lhs } :: lst
   in
   List.fold_right (fun ({ c_lhs; c_rhs } as case) (vals, exns) ->
-    match split_pattern c_lhs, c_rhs with
-    | (Some _, Some _), (Boolean_guarded_rhs _ | Pattern_guarded_rhs _) ->
+    match split_pattern c_lhs with
+    | Some _, Some _ when is_guarded_rhs c_rhs ->
       raise (Error (c_lhs.pat_loc, env,
                     Mixed_value_and_exception_patterns_under_guard))
-    | (vp, ep), _ -> add_case vals case vp, add_case exns case ep
+    | vp, ep -> add_case vals case vp, add_case exns case ep
   ) cases ([], [])
 
 (* When typing a for-loop index or similar, we need to restrict ourselves to the

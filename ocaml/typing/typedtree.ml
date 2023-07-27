@@ -1020,3 +1020,7 @@ let split_pattern pat =
         combine_opts (into cpat) exns1 exns2
   in
   split_pattern pat
+
+let is_guarded_rhs = function
+  | Simple_rhs _ -> false
+  | Boolean_guarded_rhs _ | Pattern_guarded_rhs _ -> true
