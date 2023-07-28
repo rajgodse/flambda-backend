@@ -486,7 +486,7 @@ let expression sub exp =
 
     (* Pexp_function can't have a label, so we split in 3 cases. *)
     (* One case, no guard: It's a fun. *)
-    | Texp_function { arg_label; cases = [{c_lhs=p; c_rhs=(Simple_rhs e)}];
+    | Texp_function { arg_label; cases = [{c_lhs=p; c_rhs=Simple_rhs e}];
           _ } ->
         Pexp_fun (arg_label, None, sub.pat sub p, sub.expr sub e)
     (* No label: it's a function. *)
