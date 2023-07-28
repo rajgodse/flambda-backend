@@ -2102,12 +2102,12 @@ let do_check_fragile loc casel pss =
 (********************************)
 
 let check_unused pred casel =
-  let refute = function
+  let is_refutation_case = function
     | Simple_rhs { exp_desc = Texp_unreachable; _ } -> true
     | Simple_rhs _ | Boolean_guarded_rhs _ | Pattern_guarded_rhs _ -> false
   in
   if Warnings.is_active Warnings.Redundant_case
-  || List.exists (fun case -> refute case.c_rhs) casel then
+  || List.exists (fun case -> is_refutation_case case.c_rhs) casel then
     let rec do_rec pref = function
       | [] -> ()
       | {c_lhs=q; c_rhs} :: rem ->
@@ -2121,7 +2121,7 @@ let check_unused pred casel =
                 |> get_mins le_pats in
               (* First look for redundant or partially redundant patterns *)
               let r = every_satisfiables (make_rows pss) (make_row qs) in
-              let refute = refute c_rhs in
+              let refute = is_refutation_case c_rhs in
               (* Do not warn for unused [pat -> .] *)
               if r = Unused && refute then () else
               let r =
