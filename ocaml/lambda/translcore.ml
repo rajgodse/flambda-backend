@@ -1050,19 +1050,20 @@ and transl_list_with_shape ~scopes expr_list =
 
 and transl_rhs ~scopes rhs_sort rhs =
   let layout = layout_rhs rhs_sort rhs in
-  let transl_body body =
-    event_before ~scopes body (transl_exp ~scopes rhs_sort body)
-  in
   match rhs with
-  | Simple_rhs rhs -> Matching.mk_unguarded_rhs (transl_body rhs)
+  | Simple_rhs rhs ->
+      Matching.mk_unguarded_rhs
+        (event_before ~scopes rhs (transl_exp ~scopes rhs_sort rhs))
   | Boolean_guarded_rhs { bg_guard; bg_rhs } ->
       let guard = transl_exp ~scopes Sort.for_predef_value bg_guard in
-      let rhs = event_before ~scopes bg_rhs (transl_body bg_rhs) in
+      let body =
+        event_before ~scopes bg_rhs (transl_exp ~scopes rhs_sort bg_rhs)
+      in
       let patch_guarded ~patch =
         event_before ~scopes bg_guard (Lifthenelse (guard, body, patch, layout))
       in
       let free_variables =
-        Ident.Set.union (free_variables guard) (free_variables rhs)
+        Ident.Set.union (free_variables guard) (free_variables body)
       in
       Matching.mk_boolean_guarded_rhs ~patch_guarded ~free_variables
   | Pattern_guarded_rhs { pg_scrutinee; pg_scrutinee_sort; pg_cases; pg_partial;
