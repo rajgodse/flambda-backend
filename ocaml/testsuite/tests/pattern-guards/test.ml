@@ -298,6 +298,19 @@ Line 3, characters 4-32:
 Error: Mixing value and exception patterns under when-guards is not supported.
 |}];;
 
+(* Test rejection of pattern guards on mixed exception/value or-patterns *)
+let reject_guarded_val_exn_orp k =
+  match k () with
+  | Some s | exception Failure s when s match "foo" -> s
+  | _ -> "Not foo"
+;;
+[%%expect{|
+Line 3, characters 4-32:
+3 |   | Some s | exception Failure s when s match "foo" -> s
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: Mixing value and exception patterns under when-guards is not supported.
+|}];;
+
 module M : sig
   type 'a t
 
