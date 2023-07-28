@@ -302,9 +302,9 @@ module Analyser =
             that there is a let param_name = ... in ... just right now *)
           let (p, next_exp) =
             match func_body with
-            | Boolean_guarded_rhs _ | Pattern_guarded_rhs _ ->
-                parameter, func_body
-            | Simple_rhs func_body ->
+            | Pattern_guarded_rhs _ -> parameter, None
+            | Simple_rhs func_body
+            | Boolean_guarded_rhs { bg_rhs = func_body; _ } ->
                 match parameter with
                   Simple_name { sn_name = "*opt*" } ->
                     (
@@ -319,18 +319,17 @@ module Analyser =
                                 sn_type = Odoc_env.subst_type env exp.exp_type
                               }
                           in
-                          (new_param, Simple_rhs func_body2)
+                          (new_param, Some func_body2)
                       | _ ->
-                          (parameter, Simple_rhs func_body)
+                          (parameter, Some func_body)
                       )
                      )
                 | _ ->
-                    parameter, Simple_rhs func_body
+                    parameter, Some func_body
           in
          (* continue if the body is still a function *)
           match next_exp with
-            Simple_rhs
-              { exp_desc = Texp_function { cases = pat_exp_list ; _ } } ->
+          | Some { exp_desc = Texp_function { cases = pat_exp_list ; _ } } ->
               p :: (tt_analyse_function_parameters env current_comment_opt pat_exp_list)
           | _ ->
               (* something else ; no more parameter *)
@@ -428,8 +427,9 @@ module Analyser =
        the first time ; in that case we must not keep the first parameter,
        which is "self-*", the object itself.
     *)
-    let rec tt_analyse_method_expression env current_method_name comment_opt ~first = function 
-      | Simple_rhs { exp_desc = Typedtree.Texp_function { cases = pat_exp_list; _ }; _ } -> 
+    let rec tt_analyse_method_expression env current_method_name comment_opt ?(first=true) exp =
+      match exp.Typedtree.exp_desc with
+        Typedtree.Texp_function { cases = pat_exp_list; _ } ->
           (
            match pat_exp_list with
              [] ->
@@ -450,7 +450,7 @@ module Analyser =
                    in
                    [ new_param ]
 
-               | {c_lhs=pattern_param; c_rhs=body} :: [] ->
+               | {c_lhs=pattern_param; c_rhs=Simple_rhs body | Boolean_guarded_rhs {bg_rhs = body}} :: [] ->
                    (* if this is the first call to the function, this is the first parameter and we skip it *)
                    if not first then
                      (
@@ -464,44 +464,38 @@ module Analyser =
                       (* We look if the name of the parameter we just add is "*opt*", which means
                          that there is a let param_name = ... in ... just right now. *)
                       let (current_param, next_exp) =
-                        match body with
-                        | Boolean_guarded_rhs _ | Pattern_guarded_rhs _ ->
-                            parameter, body
-                        | Simple_rhs body ->
-                          match parameter with
-                            Simple_name { sn_name = "*opt*"} ->
+                        match parameter with
+                          Simple_name { sn_name = "*opt*"} ->
+                            (
                               (
-                               (
-                                match body.exp_desc with
-                                  Typedtree.Texp_let (_, {vb_pat={pat_desc = Typedtree.Tpat_var (id, _, _) };
-                                                          vb_expr=exp} :: _, body2) ->
-                                    let name = Name.from_ident id in
-                                    let new_param = Simple_name
-                                        { sn_name = name ;
-                                          sn_text = Odoc_parameter.desc_from_info_opt comment_opt name ;
-                                          sn_type = Odoc_env.subst_type env exp.Typedtree.exp_type ;
-                                        }
-                                    in
-                                    (new_param, Simple_rhs body2)
-                                | _ ->
-                                    (parameter, Simple_rhs body)
-                               )
+                              match body.exp_desc with
+                                Typedtree.Texp_let (_, {vb_pat={pat_desc = Typedtree.Tpat_var (id, _, _) };
+                                                        vb_expr=exp} :: _, body2) ->
+                                  let name = Name.from_ident id in
+                                  let new_param = Simple_name
+                                      { sn_name = name ;
+                                        sn_text = Odoc_parameter.desc_from_info_opt comment_opt name ;
+                                        sn_type = Odoc_env.subst_type env exp.Typedtree.exp_type ;
+                                      }
+                                  in
+                                  (new_param, body2)
+                              | _ ->
+                                  (parameter, body)
                               )
-                          | _ ->
-                              (* no *opt* parameter, we add the parameter then continue *)
-                              (parameter, Simple_rhs body)
+                            )
+                        | _ ->
+                            (* no *opt* parameter, we add the parameter then continue *)
+                            (parameter, body)
                       in
                       current_param :: (tt_analyse_method_expression env current_method_name comment_opt ~first: false next_exp)
                      )
                    else
                      tt_analyse_method_expression env current_method_name comment_opt ~first: false body
+               | {c_rhs=Pattern_guarded_rhs _} :: [] -> []
           )
       | _ ->
           (* no more parameter *)
           []
-      
-    let tt_analyse_method_expression env current_method_name comment_opt ?(first=true) exp =
-      tt_analyse_method_expression env current_method_name comment_opt ~first (Simple_rhs exp)
 
     (** Analysis of a [Parsetree.class_struture] and a [Typedtree.class_structure] to get a couple
        (inherited classes, class elements). *)
