@@ -305,7 +305,7 @@ let event_before ~scopes exp lam =
 let event_after ~scopes exp lam =
   Translprim.event_after (of_location ~scopes exp.exp_loc) exp lam
 
-let event_function_impl ~scopes loc env lam =
+let event_function ~scopes loc env lam =
   if !Clflags.debug && not !Clflags.native_code then
     let repr = Some (ref 0) in
     let (info, body) = lam repr in
@@ -317,15 +317,15 @@ let event_function_impl ~scopes loc env lam =
   else
     lam None
 
-let event_function ~scopes exp lam =
-  event_function_impl ~scopes exp.exp_loc exp.exp_env lam
+let event_function_expr ~scopes exp lam =
+  event_function ~scopes exp.exp_loc exp.exp_env lam
 
 let event_function_rhs ~scopes rhs lam =
   match rhs with
   | Simple_rhs rhs_exp | Boolean_guarded_rhs { bg_rhs = rhs_exp; _ } ->
-      event_function ~scopes rhs_exp lam
+      event_function_expr ~scopes rhs_exp lam
   | Pattern_guarded_rhs { pg_loc; pg_env; _ } ->
-      event_function_impl ~scopes pg_loc pg_env lam
+      event_function ~scopes pg_loc pg_env lam
 
 (* Assertions *)
 
@@ -1382,7 +1382,7 @@ and transl_function ~scopes e alloc_mode param arg_mode arg_sort return_sort
     function_arg_layout e.exp_env e.exp_loc arg_sort e.exp_type
   in
   let ((kind, params, return, region), body) =
-    event_function ~scopes e
+    event_function_expr ~scopes e
       (function repr ->
          let pl =
            push_defaults e.exp_loc arg_mode arg_sort cases partial warnings
