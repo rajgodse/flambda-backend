@@ -277,6 +277,10 @@ let rec push_defaults loc bindings use_lhs arg_mode arg_sort cases
           let pure_case ({c_lhs; _} as case) =
             {case with c_lhs = as_computation_pattern c_lhs} in
           List.map pure_case cases in
+        (* [exp_attributes] and [exp_extra] are shared by the outer match
+           expression and its scrutinee. This is a faithful translation of the
+           earlier code, which we won't interrogate too carefully as it is
+           deleted as part of syntactic arity changes. *)
         { exp_loc = loc; exp_env = env; exp_extra; exp_type; exp_attributes;
           exp_desc = Texp_match
             ({ exp_type = pat.pat_type; exp_env = env; exp_loc; exp_extra;
