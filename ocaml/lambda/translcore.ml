@@ -1123,13 +1123,13 @@ and transl_cases_try ~scopes rhs_sort cases =
   in
   List.map (transl_case_try ~scopes rhs_sort) cases
 
-and transl_tupled_cases ~scopes rhs_sort patl_expr_list =
-  let patl_expr_list =
-    List.filter (fun (_, rhs) -> not (is_rhs_unreachable rhs)) patl_expr_list
+and transl_tupled_cases ~scopes rhs_sort patl_rhs_list =
+  let patl_rhs_list =
+    List.filter (fun (_, rhs) -> not (is_rhs_unreachable rhs)) patl_rhs_list
   in
   List.map
     (fun (patl, rhs) -> (patl, transl_rhs ~scopes rhs_sort rhs))
-    patl_expr_list
+    patl_rhs_list
 
 and transl_apply ~scopes
       ?(tailcall=Default_tailcall)
@@ -1327,7 +1327,7 @@ and transl_tupled_function
       && List.length pl <= (Lambda.max_arity ()) ->
       begin try
         let size = List.length pl in
-        let pats_expr_list =
+        let pats_rhs_list =
           List.map
             (fun {c_lhs; c_rhs} ->
               (Matching.flatten_pattern size c_lhs, c_rhs))
@@ -1349,7 +1349,7 @@ and transl_tupled_function
         let params = List.map fst tparams in
         let body =
           Matching.for_tupled_function ~scopes ~return_layout loc params
-            (transl_tupled_cases ~scopes return_sort pats_expr_list) partial
+            (transl_tupled_cases ~scopes return_sort pats_rhs_list) partial
         in
         let region = region || not (may_allocate_in_region body) in
         ((Tupled, tparams, return_layout, region), body)
