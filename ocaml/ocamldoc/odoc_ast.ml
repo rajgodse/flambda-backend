@@ -449,7 +449,7 @@ module Analyser =
                          sn_type = Odoc_env.subst_type env pattern_param.Typedtree.pat_type }
                    in
                    [ new_param ]
-
+               | {c_rhs=Pattern_guarded_rhs _} :: [] -> []
                | {c_lhs=pattern_param; c_rhs=Simple_rhs body | Boolean_guarded_rhs {bg_rhs = body}} :: [] ->
                    (* if this is the first call to the function, this is the first parameter and we skip it *)
                    if not first then
@@ -467,7 +467,7 @@ module Analyser =
                         match parameter with
                           Simple_name { sn_name = "*opt*"} ->
                             (
-                              (
+                             (
                               match body.exp_desc with
                                 Typedtree.Texp_let (_, {vb_pat={pat_desc = Typedtree.Tpat_var (id, _, _) };
                                                         vb_expr=exp} :: _, body2) ->
@@ -481,7 +481,7 @@ module Analyser =
                                   (new_param, body2)
                               | _ ->
                                   (parameter, body)
-                              )
+                             )
                             )
                         | _ ->
                             (* no *opt* parameter, we add the parameter then continue *)
@@ -491,7 +491,6 @@ module Analyser =
                      )
                    else
                      tt_analyse_method_expression env current_method_name comment_opt ~first: false body
-               | {c_rhs=Pattern_guarded_rhs _} :: [] -> []
           )
       | _ ->
           (* no more parameter *)
