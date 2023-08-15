@@ -50,6 +50,7 @@ let get_level_ops : type a. a t -> (module Extension_level with type t = a) =
   | Immutable_arrays -> (module Unit)
   | Module_strengthening -> (module Unit)
   | Layouts -> (module Maturity)
+  | Pattern_guards -> (module Unit)
   | SIMD -> (module Unit)
 
 type extn_pair = Exist_pair.t = Pair : 'a t * 'a -> extn_pair
@@ -78,9 +79,12 @@ let equal_t (type a b) (a : a t) (b : b t) : (a, b) Misc.eq option = match a, b 
   | Immutable_arrays, Immutable_arrays -> Some Refl
   | Module_strengthening, Module_strengthening -> Some Refl
   | Layouts, Layouts -> Some Refl
+  | Pattern_guards, Pattern_guards -> Some Refl
   | SIMD, SIMD -> Some Refl
   | (Comprehensions | Local | Include_functor | Polymorphic_parameters |
-     Immutable_arrays | Module_strengthening | Layouts | SIMD), _ -> None
+     Immutable_arrays | Module_strengthening | Layouts | Pattern_guards | SIMD)
+    , _ ->
+      None
 
 let equal a b = Option.is_some (equal_t a b)
 

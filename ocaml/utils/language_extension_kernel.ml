@@ -9,6 +9,7 @@ type _ t =
   | Immutable_arrays : unit t
   | Module_strengthening : unit t
   | Layouts : maturity t
+  | Pattern_guards : unit t
   | SIMD : unit t
 
 type 'a language_extension_kernel = 'a t
@@ -24,6 +25,7 @@ module Exist = struct
     ; Pack Immutable_arrays
     ; Pack Module_strengthening
     ; Pack Layouts
+    ; Pack Pattern_guards
     ; Pack SIMD
     ]
 end
@@ -41,6 +43,7 @@ let to_string : type a. a t -> string = function
   | Immutable_arrays -> "immutable_arrays"
   | Module_strengthening -> "module_strengthening"
   | Layouts -> "layouts"
+  | Pattern_guards -> "pattern_guards"
   | SIMD -> "simd"
 
 (* converts full extension names, like "layouts_alpha" to a pair of
@@ -58,6 +61,7 @@ let pair_of_string extn_name : Exist_pair.t option =
   | "layouts" -> Some (Pair (Layouts, Stable))
   | "layouts_alpha" -> Some (Pair (Layouts, Alpha))
   | "layouts_beta" -> Some (Pair (Layouts, Beta))
+  | "pattern_guards" -> Some (Pair (Pattern_guards, ()))
   | "simd" -> Some (Pair (SIMD, ()))
   | _ -> None
 
@@ -88,6 +92,7 @@ let is_erasable : type a. a t -> bool = function
   | Polymorphic_parameters
   | Immutable_arrays
   | Module_strengthening
+  | Pattern_guards
   | SIMD ->
       false
 
